@@ -1,0 +1,14 @@
+# Grosvenor TA Website - Netlify Configuration
+# IMPORTANT: This file prevents Netlify/Cloudflare from obfuscating emails
+
+[build.processing]
+  skip_processing = false
+
+[build.processing.html]
+  pretty_urls = true
+  
+# CRITICAL: Disable email obfuscation
+# Without this, all email addresses get replaced with [email protected]
+# and require JavaScript to decode - breaking accessibility and causing issues
+[build.processing.html]
+  email_obfuscation = false

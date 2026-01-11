@@ -1,0 +1,2455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grosvenor Community</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --warm-orange: #D35400;
+            --deep-orange: #A04000;
+            --cream: #FDF8F3;
+            --soft-orange: #E67E22;
+            --light-orange: #FDEEE4;
+            --text-dark: #3A3A3A;
+            --text-light: #6B6B6B;
+            --border-light: #F0E6DC;
+            --success: #27ae60;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--cream);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--warm-orange);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        header a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .user-info span {
+            opacity: 0.9;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Main container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Auth screens */
+        .auth-container {
+            max-width: 400px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .auth-container h2 {
+            color: var(--deep-orange);
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .auth-container p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--soft-orange);
+        }
+
+        .checkbox-group {
+            margin-top: 1rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin-top: 0.2rem;
+        }
+
+        .checkbox-label span {
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background-color: var(--warm-orange);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background-color: var(--deep-orange);
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--warm-orange);
+            border: 1px solid var(--warm-orange);
+            margin-top: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--light-orange);
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .auth-toggle a {
+            color: var(--warm-orange);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-light);
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            border-radius: 6px 6px 0 0;
+            font-family: inherit;
+        }
+
+        .tab:hover {
+            color: var(--text-dark);
+            background: var(--light-orange);
+        }
+
+        .tab.active {
+            color: var(--warm-orange);
+            font-weight: 600;
+            background: var(--light-orange);
+        }
+
+        /* Content panels */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-author {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .card-meta {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .card-apt {
+            font-size: 0.85rem;
+            color: var(--warm-orange);
+        }
+
+        .card-content {
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .card-category {
+            display: inline-block;
+            background: var(--light-orange);
+            color: var(--deep-orange);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Post form */
+        .post-form {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .post-form h3 {
+            margin-bottom: 1rem;
+            color: var(--deep-orange);
+            font-size: 1.1rem;
+        }
+
+        .post-form textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .post-form .btn {
+            width: auto;
+            margin-top: 0.5rem;
+        }
+
+        /* Chat */
+        .chat-container {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .chat-message:last-child {
+            border-bottom: none;
+        }
+
+        .chat-message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+        }
+
+        .chat-message-author {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .chat-message-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .chat-message-text {
+            font-size: 0.95rem;
+        }
+
+        .chat-input-area {
+            border-top: 1px solid var(--border-light);
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 0.6rem;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .chat-input-area button {
+            padding: 0.6rem 1.2rem;
+            background: var(--warm-orange);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Directory */
+        .directory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .directory-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .directory-card h4 {
+            margin-bottom: 0.25rem;
+            color: var(--text-dark);
+        }
+
+        .directory-card .apt {
+            color: var(--warm-orange);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .directory-card .contact {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Admin section */
+        .admin-section {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-section h3 {
+            color: #856404;
+            margin-bottom: 0.75rem;
+        }
+
+        .pending-user {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pending-user-info {
+            flex: 1;
+        }
+
+        .pending-user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-approve {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-reject {
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .empty-state p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Awaiting approval screen */
+        .awaiting-approval {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .awaiting-approval h2 {
+            color: var(--deep-orange);
+            margin-bottom: 1rem;
+        }
+
+        .awaiting-approval p {
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Unread badge */
+        .badge {
+            background: var(--warm-orange);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 10px;
+            margin-left: 0.3rem;
+            font-weight: 600;
+        }
+
+        /* Conversations list */
+        .conversation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .conversation-item:hover {
+            background: var(--light-orange);
+        }
+
+        .conversation-item.unread {
+            border-left: 3px solid var(--warm-orange);
+        }
+
+        .conversation-info {
+            flex: 1;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .conversation-preview {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 250px;
+        }
+
+        .conversation-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* Conversation view */
+        .conversation-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 1rem;
+        }
+
+        .conversation-header span {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .btn-back {
+            background: none;
+            border: 1px solid var(--border-light);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+
+        .btn-back:hover {
+            background: var(--light-orange);
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1rem;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .btn-delete:hover {
+            opacity: 1;
+        }
+
+        .dm-messages {
+            height: 350px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #fafafa;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .dm-message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+
+        .dm-message.sent {
+            background: var(--light-orange);
+            margin-left: auto;
+        }
+
+        .dm-message.received {
+            background: white;
+            border: 1px solid var(--border-light);
+        }
+
+        .dm-message-time {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            margin-top: 0.3rem;
+        }
+
+        /* Message button on directory cards */
+        .btn-message {
+            background: var(--warm-orange);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-message:hover {
+            background: var(--deep-orange);
+        }
+
+        /* Danger button */
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Deactivated user styling */
+        .former-tenant {
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+
+            .tabs {
+                justify-content: center;
+            }
+
+            .chat-container {
+                height: 400px;
+            }
+        }
+
+        /* Hidden utility */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Community Guidelines */
+        .guidelines-toggle {
+            background: var(--light-orange);
+            border: 1px solid var(--border-light);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .guidelines-toggle:hover {
+            background: var(--soft-orange);
+            color: white;
+        }
+
+        .guidelines-box {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-left: 3px solid var(--warm-orange);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .guidelines-box h4 {
+            color: var(--deep-orange);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .guidelines-box ol {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+
+        .guidelines-box li {
+            margin-bottom: 0.75rem;
+        }
+
+        .guidelines-box li strong {
+            color: var(--text-dark);
+        }
+
+        .guidelines-box ul {
+            margin: 0.25rem 0 0 0;
+            padding-left: 1.25rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .guidelines-box ul li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Guidelines Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content h3 {
+            color: var(--deep-orange);
+            margin-bottom: 1rem;
+        }
+
+        .modal-close {
+            background: var(--warm-orange);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .modal-close:hover {
+            background: var(--deep-orange);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header (shown when logged in) -->
+    <header id="mainHeader" class="hidden">
+        <h1>Grosvenor Community</h1>
+        <div class="user-info">
+            <span id="userDisplay"></span>
+            <button class="btn-logout" onclick="logout()">Log Out</button>
+        </div>
+    </header>
+
+    <!-- Auth: Login -->
+    <div id="loginScreen" class="auth-container">
+        <h2>Grosvenor Community</h2>
+        <p>Connect with your neighbors at The Grosvenor</p>
+        
+        <div style="text-align: left; background: #fff; border-radius: 8px; padding: 1.25rem; margin: 1.5rem 0; border-left: 3px solid var(--warm-orange);">
+            <p style="margin-bottom: 0.75rem; font-weight: 600;"><span style="color: #D35400;">Connect!</span> <span style="color: #00A0B0;">Message neighbors without sharing phone or email</span></p>
+            <p style="margin-bottom: 0.5rem;">🚨 Smell gas? Hear something? Check in instantly.</p>
+            <p style="margin-bottom: 0.5rem;">📦 Getting rid of it? Can I have it?</p>
+            <p style="margin-bottom: 0.5rem;">🔧 Need to know who has pliers?</p>
+            <p style="margin-bottom: 0.5rem;">🗓️ See what's happening</p>
+            <p style="margin-bottom: 0;">💬 Ask questions, share tips, connect!</p>
+        </div>
+        
+        <div id="loginMessage"></div>
+        <form onsubmit="login(event)">
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit" class="btn">Sign In</button>
+        </form>
+        <div class="auth-toggle">
+            New to the community? <a href="#" onclick="showSignup(); return false;">Sign up</a>
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="index.html" style="color: var(--text-light); font-size: 0.85rem;">← Back to main site</a>
+        </div>
+    </div>
+
+    <!-- Auth: Signup -->
+    <div id="signupScreen" class="auth-container hidden">
+        <h2>Join the Community</h2>
+        <p>Connect with your neighbors at The Grosvenor</p>
+        
+        <div style="text-align: left; background: #fff; border-radius: 8px; padding: 1.25rem; margin: 1.5rem 0; border-left: 3px solid var(--warm-orange);">
+            <p style="margin-bottom: 0.75rem; font-weight: 600;"><span style="color: #D35400;">Connect!</span> <span style="color: #00A0B0;">Message neighbors without sharing phone or email</span></p>
+            <p style="margin-bottom: 0.5rem;">🚨 Smell gas? Hear something? Check in instantly.</p>
+            <p style="margin-bottom: 0.5rem;">📦 Getting rid of it? Can I have it?</p>
+            <p style="margin-bottom: 0.5rem;">🔧 Need to know who has pliers?</p>
+            <p style="margin-bottom: 0.5rem;">🗓️ See what's happening</p>
+            <p style="margin-bottom: 0;">💬 Ask questions, share tips, connect!</p>
+        </div>
+        
+        <div id="signupMessage"></div>
+        <form onsubmit="signup(event)">
+            <div class="form-group">
+                <label for="signupName">Full Name *</label>
+                <input type="text" id="signupName" required placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label for="signupGoBy">I go by (optional)</label>
+                <input type="text" id="signupGoBy" placeholder="e.g., Kenn, K, or leave blank">
+            </div>
+            <div class="form-group">
+                <label for="signupApt">Apartment Number *</label>
+                <input type="text" id="signupApt" required placeholder="e.g., 4B">
+            </div>
+            <div class="form-group">
+                <label for="signupEmail">Email *</label>
+                <input type="email" id="signupEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="signupPhone">Phone (optional)</label>
+                <input type="tel" id="signupPhone" placeholder="For the tenant directory">
+            </div>
+            <div class="form-group">
+                <label for="signupBirthdayMonth">Birthday (optional)</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <select id="signupBirthdayMonth" style="flex: 1;">
+                        <option value="">Month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <select id="signupBirthdayDay" style="flex: 1;">
+                        <option value="">Day</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="26">26</option>
+                        <option value="27">27</option>
+                        <option value="28">28</option>
+                        <option value="29">29</option>
+                        <option value="30">30</option>
+                        <option value="31">31</option>
+                    </select>
+                </div>
+                <label class="checkbox-label" style="margin-top: 0.5rem;">
+                    <input type="checkbox" id="signupBirthdaySecret">
+                    <span style="font-size: 0.9rem;">🤫 My birthday is top secret</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="signupMovedInMonth">Moved in (optional)</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <select id="signupMovedInMonth" style="flex: 1;">
+                        <option value="">Month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <select id="signupMovedInYear" style="flex: 1;">
+                        <option value="">Year</option>
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2019</option>
+                        <option value="2018">2018</option>
+                        <option value="2017">2017</option>
+                        <option value="2016">2016</option>
+                        <option value="2015">2015</option>
+                        <option value="2014">2014</option>
+                        <option value="2013">2013</option>
+                        <option value="2012">2012</option>
+                        <option value="2011">2011</option>
+                        <option value="2010">2010</option>
+                        <option value="2009">2009</option>
+                        <option value="2008">2008</option>
+                        <option value="2007">2007</option>
+                        <option value="2006">2006</option>
+                        <option value="2005">2005</option>
+                        <option value="2004">2004</option>
+                        <option value="2003">2003</option>
+                        <option value="2002">2002</option>
+                        <option value="2001">2001</option>
+                        <option value="2000">2000</option>
+                        <option value="1999">1999</option>
+                        <option value="1998">1998</option>
+                        <option value="1997">1997</option>
+                        <option value="1996">1996</option>
+                        <option value="1995">1995</option>
+                        <option value="1994">1994</option>
+                        <option value="1993">1993</option>
+                        <option value="1992">1992</option>
+                        <option value="1991">1991</option>
+                        <option value="1990">1990</option>
+                        <option value="1989">1989</option>
+                        <option value="1988">1988</option>
+                        <option value="1987">1987</option>
+                        <option value="1986">1986</option>
+                        <option value="1985">1985</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="signupPassword">Password *</label>
+                <input type="password" id="signupPassword" required minlength="6">
+            </div>
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="signupNewsletter" checked>
+                    <span>Send me the monthly TA newsletter</span>
+                </label>
+            </div>
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="signupShareContact" checked>
+                    <span>Share my email/phone in the tenant directory</span>
+                </label>
+                <small style="color: var(--text-light); display: block; margin-top: 0.3rem;">Your name and apartment are always visible to neighbors. You can change this later in Settings.</small>
+            </div>
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="signupAgreeGuidelines" required>
+                    <span>I agree to follow the <a href="#" onclick="showGuidelinesModal(); return false;" style="color: var(--warm-orange);">Community Guidelines</a> *</span>
+                </label>
+            </div>
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="signupAgreeTerms" required>
+                    <span>I agree to the <a href="terms.html" target="_blank" style="color: var(--warm-orange);">Terms of Service & Privacy Policy</a> *</span>
+                </label>
+            </div>
+            <button type="submit" class="btn">Request to Join</button>
+        </form>
+        <div class="auth-toggle">
+            Already a member? <a href="#" onclick="showLogin(); return false;">Sign in</a>
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="index.html" style="color: var(--text-light); font-size: 0.85rem;">← Back to main site</a>
+        </div>
+    </div>
+
+    <!-- Awaiting Approval Screen -->
+    <div id="awaitingScreen" class="auth-container hidden">
+        <div class="awaiting-approval">
+            <h2>Almost There!</h2>
+            <p>Your registration is pending approval.</p>
+            <p>You'll receive an email once you're approved.</p>
+            <p style="margin-top: 1.5rem; font-size: 0.9rem;">This helps us keep our community safe and ensures only actual tenants have access.</p>
+            <button class="btn btn-secondary" onclick="logout()" style="margin-top: 1.5rem; width: auto;">Sign Out</button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="container hidden">
+        
+        <!-- Admin: Pending Approvals (only shown to admin) -->
+        <div id="adminSection" class="admin-section hidden">
+            <h3>⚙️ Pending Approvals</h3>
+            <div id="pendingUsers"></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('announcements')">Announcements</button>
+            <button class="tab" onclick="showTab('bulletin')">Bulletin Board</button>
+            <button class="tab" onclick="showTab('chat')">Chat</button>
+            <button class="tab" onclick="showTab('messages')" id="messagesTab">Messages <span id="unreadBadge" class="badge hidden">0</span></button>
+            <button class="tab" onclick="showTab('directory')">Directory</button>
+            <button class="tab" onclick="showTab('settings')">Settings</button>
+        </div>
+
+        <!-- Announcements Panel -->
+        <div id="announcements" class="panel active">
+            <!-- Admin: Post announcement (only shown to admin) -->
+            <div id="announcementForm" class="post-form hidden">
+                <h3>Post Announcement</h3>
+                <form onsubmit="postAnnouncement(event)">
+                    <div class="form-group">
+                        <label for="announcementTitle">Title</label>
+                        <input type="text" id="announcementTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="announcementContent">Content</label>
+                        <textarea id="announcementContent" required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Post Announcement</button>
+                </form>
+            </div>
+            <div id="announcementsList"></div>
+        </div>
+
+        <!-- Bulletin Board Panel -->
+        <div id="bulletin" class="panel">
+            <div class="post-form">
+                <h3>Post to the Board</h3>
+                <form onsubmit="postBulletin(event)">
+                    <div class="form-group">
+                        <label for="bulletinCategory">Category</label>
+                        <select id="bulletinCategory">
+                            <option value="general">General</option>
+                            <option value="selling">Selling</option>
+                            <option value="giving">Giving Away</option>
+                            <option value="wanted">Wanted</option>
+                            <option value="services">Services</option>
+                            <option value="recommendations">Recommendations</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bulletinContent">Your Post</label>
+                        <textarea id="bulletinContent" required placeholder="What would you like to share?"></textarea>
+                    </div>
+                    <button type="submit" class="btn">Post</button>
+                </form>
+            </div>
+            <div id="bulletinList"></div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div id="chat" class="panel">
+            <button class="guidelines-toggle" onclick="toggleGuidelines()">📋 Community Guidelines</button>
+            <div id="guidelinesBox" class="guidelines-box hidden">
+                <h4>Our Community Guidelines</h4>
+                <ol>
+                    <li><strong>Focus on the positive</strong>
+                        <ul>
+                            <li>Share helpful information, resources, and opportunities</li>
+                            <li>Celebrate our community's strengths and each other's contributions</li>
+                            <li>Suggest solutions when identifying challenges</li>
+                        </ul>
+                    </li>
+                    <li><strong>Respect our shared space</strong>
+                        <ul>
+                            <li>Keep conversations constructive and considerate</li>
+                            <li>Remember that neighbors of all backgrounds read these posts</li>
+                            <li>Give others the benefit of the doubt in all interactions</li>
+                        </ul>
+                    </li>
+                    <li><strong>Keep it practical and relevant</strong>
+                        <ul>
+                            <li>Posts should relate to our building community or immediate neighborhood</li>
+                            <li>Share information that benefits fellow residents</li>
+                            <li>Use direct messages for conversations relevant to only a few people</li>
+                        </ul>
+                    </li>
+                    <li><strong>Protect privacy and safety</strong>
+                        <ul>
+                            <li>Don't share other residents' personal information without permission</li>
+                            <li>Avoid posting sensitive building security information publicly</li>
+                            <li>Use discretion when posting about your own comings and goings</li>
+                        </ul>
+                    </li>
+                    <li><strong>Building-related concerns</strong>
+                        <ul>
+                            <li>This community space is for neighbor-to-neighbor connection</li>
+                            <li>Direct maintenance requests and management concerns through official channels</li>
+                            <li>Focus discussions on solutions rather than complaints</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleChatKeypress(event)">
+                    <button onclick="sendChat()">Send</button>
+                </div>
+                <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-light);">
+                    <label class="checkbox-label" style="font-size: 0.9rem; color: var(--text-light);">
+                        <input type="checkbox" id="settingsNotifyChatDigest" onchange="updateChatDigestSetting()">
+                        <span>📬 Send me a daily digest if there's chat activity</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Panel (Direct Messages) -->
+        <div id="messages" class="panel">
+            <!-- Conversations List View -->
+            <div id="conversationsList">
+                <p style="margin-bottom: 1rem; color: var(--text-light);">Your private conversations with neighbors.</p>
+                <div id="conversationsContainer"></div>
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-light);">
+                    <label class="checkbox-label" style="font-size: 0.9rem; color: var(--text-light);">
+                        <input type="checkbox" id="settingsNotifyDMs" onchange="updateDMNotificationSetting()">
+                        <span>📬 Let me know when I get a DM</span>
+                    </label>
+                </div>
+            </div>
+            <!-- Single Conversation View -->
+            <div id="conversationView" class="hidden">
+                <div class="conversation-header">
+                    <button class="btn-back" onclick="backToConversations()">← Back</button>
+                    <span id="conversationWith"></span>
+                </div>
+                <div class="dm-messages" id="dmMessages"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="dmInput" placeholder="Type a message..." onkeypress="handleDmKeypress(event)">
+                    <button onclick="sendDirectMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Directory Panel -->
+        <div id="directory" class="panel">
+            <p style="margin-bottom: 1rem; color: var(--text-light);">Your neighbors at The Grosvenor. Click "Message" to start a private conversation.</p>
+            <div id="directoryList" class="directory-grid"></div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings" class="panel">
+            <div class="card">
+                <h3>My Profile</h3>
+                <p style="color: var(--text-light); margin-bottom: 1rem;">Update your profile information.</p>
+                
+                <div class="form-group">
+                    <label for="settingsFullName">Full Name</label>
+                    <input type="text" id="settingsFullName" placeholder="Your full name">
+                </div>
+                <div class="form-group">
+                    <label for="settingsGoBy">I go by</label>
+                    <input type="text" id="settingsGoBy" placeholder="e.g., Kenn, K, or leave blank">
+                </div>
+                <div class="form-group">
+                    <label for="settingsPhone">Phone</label>
+                    <input type="tel" id="settingsPhone" placeholder="For the tenant directory">
+                </div>
+                <div class="form-group">
+                    <label>Birthday</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="settingsBirthdayMonth" style="flex: 1;">
+                            <option value="">Month</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <select id="settingsBirthdayDay" style="flex: 1;">
+                            <option value="">Day</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="22">22</option>
+                            <option value="23">23</option>
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
+                            <option value="31">31</option>
+                        </select>
+                    </div>
+                    <label class="checkbox-label" style="margin-top: 0.5rem;">
+                        <input type="checkbox" id="settingsBirthdaySecret">
+                        <span style="font-size: 0.9rem;">🤫 My birthday is top secret</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Moved in</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="settingsMovedInMonth" style="flex: 1;">
+                            <option value="">Month</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <select id="settingsMovedInYear" style="flex: 1;">
+                            <option value="">Year</option>
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                            <option value="2019">2019</option>
+                            <option value="2018">2018</option>
+                            <option value="2017">2017</option>
+                            <option value="2016">2016</option>
+                            <option value="2015">2015</option>
+                            <option value="2014">2014</option>
+                            <option value="2013">2013</option>
+                            <option value="2012">2012</option>
+                            <option value="2011">2011</option>
+                            <option value="2010">2010</option>
+                            <option value="2009">2009</option>
+                            <option value="2008">2008</option>
+                            <option value="2007">2007</option>
+                            <option value="2006">2006</option>
+                            <option value="2005">2005</option>
+                            <option value="2004">2004</option>
+                            <option value="2003">2003</option>
+                            <option value="2002">2002</option>
+                            <option value="2001">2001</option>
+                            <option value="2000">2000</option>
+                            <option value="1999">1999</option>
+                            <option value="1998">1998</option>
+                            <option value="1997">1997</option>
+                            <option value="1996">1996</option>
+                            <option value="1995">1995</option>
+                            <option value="1994">1994</option>
+                            <option value="1993">1993</option>
+                            <option value="1992">1992</option>
+                            <option value="1991">1991</option>
+                            <option value="1990">1990</option>
+                            <option value="1989">1989</option>
+                            <option value="1988">1988</option>
+                            <option value="1987">1987</option>
+                            <option value="1986">1986</option>
+                            <option value="1985">1985</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="settingsNewsletter">
+                        <span>Send me the monthly TA newsletter</span>
+                    </label>
+                </div>
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="settingsNotifyAnnouncements">
+                        <span>📬 Email me when there's a new announcement</span>
+                    </label>
+                    <small style="color: var(--text-light); display: block; margin-top: 0.3rem;">Get notified about important building updates. We'll never spam you.</small>
+                </div>
+                <button class="btn" onclick="saveProfile()">Save Profile</button>
+                <div id="profileMessage" style="margin-top: 1rem;"></div>
+                
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #eee;">
+                    <h4 style="margin-bottom: 0.75rem; color: var(--text-light);">Preview: How others see you in the Directory</h4>
+                    <div id="profilePreview" class="directory-card" style="max-width: 300px;"></div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 1.5rem;">
+                <h3>Privacy Settings</h3>
+                <p style="color: var(--text-light); margin-bottom: 1rem;">Control what information other tenants can see about you.</p>
+                
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="settingsShareContact" onchange="updatePrivacySetting()">
+                        <span>Share my email and phone in the tenant directory</span>
+                    </label>
+                    <small style="color: var(--text-light); display: block; margin-top: 0.3rem;">When enabled, your contact info will be visible to other approved tenants in the Directory. Your name and apartment are always visible.</small>
+                </div>
+                <div id="settingsMessage" style="margin-top: 1rem;"></div>
+            </div>
+
+            <div class="card" style="margin-top: 1.5rem; border-left: 3px solid #e74c3c;">
+                <h3>Deactivate Account</h3>
+                <p style="color: var(--text-light); margin-bottom: 1rem;">If you're moving out or no longer wish to participate in the community, you can deactivate your account.</p>
+                <ul style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem; padding-left: 1.5rem;">
+                    <li>You will be removed from the tenant directory</li>
+                    <li>You will no longer be able to log in</li>
+                    <li>Your past messages and posts will remain but show as "Former Tenant"</li>
+                    <li>This action cannot be undone by you (contact admin to reactivate)</li>
+                </ul>
+                <button class="btn btn-danger" onclick="confirmDeactivation()">Deactivate My Account</button>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <a href="terms.html" target="_blank" style="color: var(--text-light); font-size: 0.85rem;">View Terms of Service & Privacy Policy</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guidelines Modal (for signup) -->
+    <div id="guidelinesModal" class="modal-overlay" onclick="closeGuidelinesModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3>Our Community Guidelines</h3>
+            <ol style="padding-left: 1.25rem; font-size: 0.9rem;">
+                <li style="margin-bottom: 0.75rem;"><strong>Focus on the positive</strong>
+                    <ul style="margin-top: 0.25rem; padding-left: 1.25rem; color: var(--text-light);">
+                        <li>Share helpful information, resources, and opportunities</li>
+                        <li>Celebrate our community's strengths and each other's contributions</li>
+                        <li>Suggest solutions when identifying challenges</li>
+                    </ul>
+                </li>
+                <li style="margin-bottom: 0.75rem;"><strong>Respect our shared space</strong>
+                    <ul style="margin-top: 0.25rem; padding-left: 1.25rem; color: var(--text-light);">
+                        <li>Keep conversations constructive and considerate</li>
+                        <li>Remember that neighbors of all backgrounds read these posts</li>
+                        <li>Give others the benefit of the doubt in all interactions</li>
+                    </ul>
+                </li>
+                <li style="margin-bottom: 0.75rem;"><strong>Keep it practical and relevant</strong>
+                    <ul style="margin-top: 0.25rem; padding-left: 1.25rem; color: var(--text-light);">
+                        <li>Posts should relate to our building community or immediate neighborhood</li>
+                        <li>Share information that benefits fellow residents</li>
+                        <li>Use direct messages for conversations relevant to only a few people</li>
+                    </ul>
+                </li>
+                <li style="margin-bottom: 0.75rem;"><strong>Protect privacy and safety</strong>
+                    <ul style="margin-top: 0.25rem; padding-left: 1.25rem; color: var(--text-light);">
+                        <li>Don't share other residents' personal information without permission</li>
+                        <li>Avoid posting sensitive building security information publicly</li>
+                        <li>Use discretion when posting about your own comings and goings</li>
+                    </ul>
+                </li>
+                <li style="margin-bottom: 0.75rem;"><strong>Building-related concerns</strong>
+                    <ul style="margin-top: 0.25rem; padding-left: 1.25rem; color: var(--text-light);">
+                        <li>This community space is for neighbor-to-neighbor connection</li>
+                        <li>Direct maintenance requests and management concerns through official channels</li>
+                        <li>Focus discussions on solutions rather than complaints</li>
+                    </ul>
+                </li>
+            </ol>
+            <button class="modal-close" onclick="closeGuidelinesModal()">Got it!</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SUPABASE CONFIGURATION
+        // ============================================
+        const SUPABASE_URL = 'https://gomwpddftdcsappyouqz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbXdwZGRmdGRjc2FwcHlvdXF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4ODIzMTYsImV4cCI6MjA4MjQ1ODMxNn0.tWVTfSiwtf9Fs0zGhvTt5okYmRQOK_wMcr74hH2tFKU';
+        
+        // Admin email (you!)
+        const ADMIN_EMAIL = 'grosvenorta@gmail.com';
+
+        // Initialize Supabase client
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ============================================
+        // STATE
+        // ============================================
+        let currentUser = null;
+        let currentProfile = null;
+        let isAdmin = false;
+
+        // ============================================
+        // AUTH FUNCTIONS
+        // ============================================
+        async function checkAuth() {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                await loadProfile();
+            } else {
+                showLogin();
+            }
+        }
+
+        async function loadProfile() {
+            const { data, error } = await db
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (error || !data) {
+                console.error('Error loading profile:', error);
+                showLogin();
+                return;
+            }
+
+            // Check if account is deactivated
+            if (data.active === false) {
+                alert('This account has been deactivated. Please contact the building administrator if you believe this is an error.');
+                logout();
+                return;
+            }
+
+            currentProfile = data;
+            isAdmin = currentUser.email === ADMIN_EMAIL;
+            
+            // Set DM notification checkbox in Messages tab
+            document.getElementById('settingsNotifyDMs').checked = currentProfile.notify_dms !== false;
+            document.getElementById('settingsNotifyChatDigest').checked = currentProfile.notify_chat_digest !== false;
+
+            if (!currentProfile.approved && !isAdmin) {
+                showAwaitingApproval();
+            } else {
+                showMainApp();
+            }
+        }
+
+        async function signup(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value.trim();
+            const goBy = document.getElementById('signupGoBy').value.trim();
+            const apt = document.getElementById('signupApt').value.trim().toUpperCase();
+            const email = document.getElementById('signupEmail').value.trim();
+            const phone = document.getElementById('signupPhone').value.trim();
+            const birthdayMonth = document.getElementById('signupBirthdayMonth').value || null;
+            const birthdayDay = document.getElementById('signupBirthdayDay').value || null;
+            const birthdaySecret = document.getElementById('signupBirthdaySecret').checked;
+            const movedInMonth = document.getElementById('signupMovedInMonth').value || null;
+            const movedInYear = document.getElementById('signupMovedInYear').value || null;
+            const password = document.getElementById('signupPassword').value;
+            const newsletter = document.getElementById('signupNewsletter').checked;
+            const shareContact = document.getElementById('signupShareContact').checked;
+
+            showMessage('signupMessage', 'Creating your account...', 'info');
+
+            const { data, error } = await db.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: name,
+                        go_by: goBy || null,
+                        apartment: apt,
+                        phone: phone || null,
+                        birthday_month: birthdayMonth ? parseInt(birthdayMonth) : null,
+                        birthday_day: birthdayDay ? parseInt(birthdayDay) : null,
+                        share_birthday: !birthdaySecret,
+                        moved_in_month: movedInMonth ? parseInt(movedInMonth) : null,
+                        moved_in_year: movedInYear ? parseInt(movedInYear) : null,
+                        subscribe_newsletter: newsletter,
+                        show_in_directory: shareContact
+                    }
+                }
+            });
+
+            if (error) {
+                showMessage('signupMessage', error.message, 'error');
+                return;
+            }
+
+            // Profile is created automatically by database trigger
+            showMessage('signupMessage', 'Account created! Please check your email to verify, then wait for approval.', 'success');
+        }
+
+        async function login(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            showMessage('loginMessage', 'Signing in...', 'info');
+
+            const { data, error } = await db.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+                showMessage('loginMessage', error.message, 'error');
+                return;
+            }
+
+            currentUser = data.user;
+            await loadProfile();
+        }
+
+        async function logout() {
+            await db.auth.signOut();
+            currentUser = null;
+            currentProfile = null;
+            isAdmin = false;
+            showLogin();
+        }
+
+        async function saveProfile() {
+            const fullName = document.getElementById('settingsFullName').value.trim();
+            const goBy = document.getElementById('settingsGoBy').value.trim();
+            const phone = document.getElementById('settingsPhone').value.trim();
+            const birthdayMonth = document.getElementById('settingsBirthdayMonth').value || null;
+            const birthdayDay = document.getElementById('settingsBirthdayDay').value || null;
+            const birthdaySecret = document.getElementById('settingsBirthdaySecret').checked;
+            const movedInMonth = document.getElementById('settingsMovedInMonth').value || null;
+            const movedInYear = document.getElementById('settingsMovedInYear').value || null;
+            const newsletter = document.getElementById('settingsNewsletter').checked;
+            const notifyAnnouncements = document.getElementById('settingsNotifyAnnouncements').checked;
+
+            if (!fullName) {
+                showMessage('profileMessage', 'Full name is required.', 'error');
+                return;
+            }
+
+            const { error } = await db
+                .from('profiles')
+                .update({
+                    full_name: fullName,
+                    go_by: goBy || null,
+                    phone: phone || null,
+                    birthday_month: birthdayMonth ? parseInt(birthdayMonth) : null,
+                    birthday_day: birthdayDay ? parseInt(birthdayDay) : null,
+                    share_birthday: !birthdaySecret,
+                    moved_in_month: movedInMonth ? parseInt(movedInMonth) : null,
+                    moved_in_year: movedInYear ? parseInt(movedInYear) : null,
+                    subscribe_newsletter: newsletter,
+                    notify_announcements: notifyAnnouncements
+                })
+                .eq('id', currentUser.id);
+
+            if (error) {
+                showMessage('profileMessage', 'Error saving profile: ' + error.message, 'error');
+                return;
+            }
+
+            // Update local profile
+            currentProfile.full_name = fullName;
+            currentProfile.go_by = goBy || null;
+            currentProfile.phone = phone || null;
+            currentProfile.birthday_month = birthdayMonth ? parseInt(birthdayMonth) : null;
+            currentProfile.birthday_day = birthdayDay ? parseInt(birthdayDay) : null;
+            currentProfile.share_birthday = !birthdaySecret;
+            currentProfile.moved_in_month = movedInMonth ? parseInt(movedInMonth) : null;
+            currentProfile.moved_in_year = movedInYear ? parseInt(movedInYear) : null;
+            currentProfile.subscribe_newsletter = newsletter;
+            currentProfile.notify_announcements = notifyAnnouncements;
+
+            // Update header display
+            updateHeaderDisplay();
+            updateProfilePreview();
+
+            showMessage('profileMessage', 'Profile saved!', 'success');
+        }
+
+        function loadSettingsForm() {
+            document.getElementById('settingsFullName').value = currentProfile.full_name || '';
+            document.getElementById('settingsGoBy').value = currentProfile.go_by || '';
+            document.getElementById('settingsPhone').value = currentProfile.phone || '';
+            document.getElementById('settingsBirthdayMonth').value = currentProfile.birthday_month || '';
+            document.getElementById('settingsBirthdayDay').value = currentProfile.birthday_day || '';
+            document.getElementById('settingsBirthdaySecret').checked = !currentProfile.share_birthday;
+            document.getElementById('settingsMovedInMonth').value = currentProfile.moved_in_month || '';
+            document.getElementById('settingsMovedInYear').value = currentProfile.moved_in_year || '';
+            document.getElementById('settingsNewsletter').checked = currentProfile.subscribe_newsletter !== false;
+            document.getElementById('settingsNotifyAnnouncements').checked = currentProfile.notify_announcements !== false;
+            document.getElementById('settingsShareContact').checked = currentProfile.show_in_directory;
+            updateProfilePreview();
+        }
+
+        function updateProfilePreview() {
+            const displayName = currentProfile.go_by || currentProfile.full_name;
+            const preview = document.getElementById('profilePreview');
+            preview.innerHTML = `
+                <h4>${escapeHtml(displayName)}</h4>
+                <div class="apt">Apt ${escapeHtml(currentProfile.apartment)}</div>
+                ${currentProfile.show_in_directory && currentProfile.phone ? `<div class="contact">📱 ${formatPhone(currentProfile.phone)}</div>` : ''}
+                ${currentProfile.show_in_directory && currentProfile.email ? `<div class="contact">✉️ <a href="mailto:${escapeHtml(currentProfile.email)}">${escapeHtml(currentProfile.email)}</a></div>` : ''}
+                ${!currentProfile.show_in_directory ? '<div class="contact" style="font-style: italic; opacity: 0.7;">Contact info private</div>' : ''}
+            `;
+        }
+
+        function updateHeaderDisplay() {
+            const displayName = currentProfile.go_by || currentProfile.full_name;
+            document.getElementById('userDisplay').textContent = `${displayName} (${currentProfile.apartment})`;
+        }
+
+        async function updatePrivacySetting() {
+            const shareContact = document.getElementById('settingsShareContact').checked;
+            
+            const { error } = await db
+                .from('profiles')
+                .update({ show_in_directory: shareContact })
+                .eq('id', currentUser.id);
+
+            if (error) {
+                showMessage('settingsMessage', 'Error updating setting: ' + error.message, 'error');
+                return;
+            }
+
+            currentProfile.show_in_directory = shareContact;
+            showMessage('settingsMessage', 'Privacy setting updated!', 'success');
+            
+            // Refresh directory and preview to reflect changes
+            loadDirectory();
+            updateProfilePreview();
+        }
+
+        async function updateDMNotificationSetting() {
+            const notifyDMs = document.getElementById('settingsNotifyDMs').checked;
+            
+            const { error } = await db
+                .from('profiles')
+                .update({ notify_dms: notifyDMs })
+                .eq('id', currentUser.id);
+
+            if (error) {
+                console.error('Error updating DM notification setting:', error);
+                return;
+            }
+
+            currentProfile.notify_dms = notifyDMs;
+        }
+
+        async function updateChatDigestSetting() {
+            const notifyChatDigest = document.getElementById('settingsNotifyChatDigest').checked;
+            
+            const { error } = await db
+                .from('profiles')
+                .update({ notify_chat_digest: notifyChatDigest })
+                .eq('id', currentUser.id);
+
+            if (error) {
+                console.error('Error updating chat digest setting:', error);
+                return;
+            }
+
+            currentProfile.notify_chat_digest = notifyChatDigest;
+        }
+
+        function confirmDeactivation() {
+            const confirmed = confirm(
+                'Are you sure you want to deactivate your account?\n\n' +
+                '• You will be logged out immediately\n' +
+                '• You will not be able to log back in\n' +
+                '• Your posts will show as "Former Tenant"\n\n' +
+                'This cannot be undone without contacting the administrator.'
+            );
+            
+            if (confirmed) {
+                deactivateAccount();
+            }
+        }
+
+        async function deactivateAccount() {
+            const { error } = await db
+                .from('profiles')
+                .update({ 
+                    active: false, 
+                    deactivated_at: new Date().toISOString(),
+                    deactivation_reason: 'Self-deactivated'
+                })
+                .eq('id', currentUser.id);
+
+            if (error) {
+                alert('Error deactivating account: ' + error.message);
+                return;
+            }
+
+            alert('Your account has been deactivated. Thank you for being part of our community.');
+            logout();
+        }
+
+        // Admin function to deactivate a user
+        async function adminDeactivateUser(userId, userName) {
+            const reason = prompt(`Deactivating ${userName}. Enter reason (e.g., "Moved out"):`);
+            if (reason === null) return; // Cancelled
+
+            const { error } = await db
+                .from('profiles')
+                .update({ 
+                    active: false, 
+                    deactivated_at: new Date().toISOString(),
+                    deactivation_reason: reason || 'Deactivated by admin'
+                })
+                .eq('id', userId);
+
+            if (error) {
+                alert('Error deactivating user: ' + error.message);
+                return;
+            }
+
+            alert(`${userName} has been deactivated.`);
+            loadDirectory();
+            loadPendingUsers();
+        }
+
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+        function showLogin() {
+            hideAll();
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        function showSignup() {
+            hideAll();
+            document.getElementById('signupScreen').classList.remove('hidden');
+        }
+
+        function showAwaitingApproval() {
+            hideAll();
+            document.getElementById('awaitingScreen').classList.remove('hidden');
+        }
+
+        function showMainApp() {
+            hideAll();
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            const displayName = currentProfile.go_by || currentProfile.full_name;
+            document.getElementById('userDisplay').textContent = `${displayName} (${currentProfile.apartment})`;
+
+            // Load privacy setting into Settings checkbox
+            document.getElementById('settingsShareContact').checked = currentProfile.show_in_directory;
+
+            if (isAdmin) {
+                document.getElementById('adminSection').classList.remove('hidden');
+                document.getElementById('announcementForm').classList.remove('hidden');
+                loadPendingUsers();
+            }
+
+            loadAnnouncements();
+            loadBulletin();
+            loadChat();
+            loadConversations();
+            loadDirectory();
+            subscribeToChat();
+        }
+
+        function hideAll() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('signupScreen').classList.add('hidden');
+            document.getElementById('awaitingScreen').classList.add('hidden');
+            document.getElementById('mainHeader').classList.add('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+            document.getElementById('announcementForm').classList.add('hidden');
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+
+            // Special handling for Messages tab
+            if (tabName === 'messages') {
+                // Reset to conversations list view
+                document.getElementById('conversationView').classList.add('hidden');
+                document.getElementById('conversationsList').classList.remove('hidden');
+                currentConversationPartner = null;
+                loadConversations();
+            }
+
+            // Special handling for Settings tab
+            if (tabName === 'settings') {
+                loadSettingsForm();
+            }
+        }
+
+        function showMessage(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = `<div class="message ${type}">${message}</div>`;
+        }
+
+        // ============================================
+        // ADMIN FUNCTIONS
+        // ============================================
+        async function loadPendingUsers() {
+            const { data, error } = await db
+                .from('profiles')
+                .select('*')
+                .eq('approved', false);
+
+            if (error) {
+                console.error('Error loading pending users:', error);
+                return;
+            }
+
+            const container = document.getElementById('pendingUsers');
+            if (data.length === 0) {
+                container.innerHTML = '<p style="color: #856404;">No pending approvals</p>';
+                return;
+            }
+
+            container.innerHTML = data.map(user => `
+                <div class="pending-user">
+                    <div class="pending-user-info">
+                        <strong>${user.full_name}</strong> - Apt ${user.apartment}<br>
+                        <small>${user.email}</small>
+                    </div>
+                    <div class="pending-user-actions">
+                        <button class="btn-approve" onclick="approveUser('${user.id}')">Approve</button>
+                        <button class="btn-reject" onclick="rejectUser('${user.id}')">Reject</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function approveUser(userId) {
+            const { error } = await db
+                .from('profiles')
+                .update({ approved: true })
+                .eq('id', userId);
+
+            if (error) {
+                alert('Error approving user: ' + error.message);
+                return;
+            }
+
+            loadPendingUsers();
+            loadDirectory();
+        }
+
+        async function rejectUser(userId) {
+            if (!confirm('Are you sure you want to reject this user?')) return;
+
+            const { error } = await db
+                .from('profiles')
+                .delete()
+                .eq('id', userId);
+
+            if (error) {
+                alert('Error rejecting user: ' + error.message);
+                return;
+            }
+
+            loadPendingUsers();
+        }
+
+        // ============================================
+        // ANNOUNCEMENTS
+        // ============================================
+        async function loadAnnouncements() {
+            const { data, error } = await db
+                .from('announcements')
+                .select('*, profiles(full_name)')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error loading announcements:', error);
+                return;
+            }
+
+            const container = document.getElementById('announcementsList');
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No announcements yet.</p></div>';
+                return;
+            }
+
+            container.innerHTML = data.map(a => `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-author">${a.title}</div>
+                            <div class="card-meta">Posted by ${a.profiles?.full_name || 'Admin'}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div class="card-meta">${formatDate(a.created_at)}</div>
+                            ${isAdmin ? `<button class="btn-delete" onclick="deleteAnnouncement('${a.id}')" title="Delete">🗑️</button>` : ''}
+                        </div>
+                    </div>
+                    <div class="card-content">${escapeHtml(a.content)}</div>
+                </div>
+            `).join('');
+        }
+
+        async function postAnnouncement(e) {
+            e.preventDefault();
+            const title = document.getElementById('announcementTitle').value.trim();
+            const content = document.getElementById('announcementContent').value.trim();
+
+            const { error } = await db
+                .from('announcements')
+                .insert({
+                    title,
+                    content,
+                    author_id: currentUser.id
+                });
+
+            if (error) {
+                alert('Error posting announcement: ' + error.message);
+                return;
+            }
+
+            document.getElementById('announcementTitle').value = '';
+            document.getElementById('announcementContent').value = '';
+            loadAnnouncements();
+        }
+
+        async function deleteAnnouncement(id) {
+            if (!confirm('Delete this announcement?')) return;
+            
+            const { error } = await db
+                .from('announcements')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                alert('Error deleting announcement: ' + error.message);
+                return;
+            }
+
+            loadAnnouncements();
+        }
+
+        // ============================================
+        // BULLETIN BOARD
+        // ============================================
+        async function loadBulletin() {
+            const { data, error } = await db
+                .from('bulletin')
+                .select('*, profiles(full_name, apartment, active)')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error loading bulletin:', error);
+                return;
+            }
+
+            const container = document.getElementById('bulletinList');
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No posts yet. Be the first!</p></div>';
+                return;
+            }
+
+            container.innerHTML = data.map(b => {
+                const isFormerTenant = b.profiles?.active === false;
+                const displayName = isFormerTenant ? 'Former Tenant' : (b.profiles?.full_name || 'Unknown');
+                const displayApt = isFormerTenant ? '' : `Apt ${b.profiles?.apartment || '?'}`;
+                return `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <span class="card-category">${formatCategory(b.category)}</span>
+                            <div class="card-author ${isFormerTenant ? 'former-tenant' : ''}">${displayName}</div>
+                            ${displayApt ? `<div class="card-apt">${displayApt}</div>` : ''}
+                        </div>
+                        <div class="card-meta">${formatDate(b.created_at)}</div>
+                    </div>
+                    <div class="card-content">${escapeHtml(b.content)}</div>
+                </div>
+            `}).join('');
+        }
+
+        async function postBulletin(e) {
+            e.preventDefault();
+            const category = document.getElementById('bulletinCategory').value;
+            const content = document.getElementById('bulletinContent').value.trim();
+
+            const { error } = await db
+                .from('bulletin')
+                .insert({
+                    category,
+                    content,
+                    author_id: currentUser.id
+                });
+
+            if (error) {
+                alert('Error posting: ' + error.message);
+                return;
+            }
+
+            document.getElementById('bulletinContent').value = '';
+            loadBulletin();
+        }
+
+        // ============================================
+        // CHAT
+        // ============================================
+        async function loadChat() {
+            const { data, error } = await db
+                .from('chat')
+                .select('*, profiles(full_name, apartment, active)')
+                .order('created_at', { ascending: true })
+                .limit(100);
+
+            if (error) {
+                console.error('Error loading chat:', error);
+                return;
+            }
+
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = data.map(m => {
+                const isFormerTenant = m.profiles?.active === false;
+                const displayName = isFormerTenant ? 'Former Tenant' : (m.profiles?.full_name || 'Unknown');
+                const displayApt = isFormerTenant ? '' : ` (${m.profiles?.apartment || '?'})`;
+                return `
+                <div class="chat-message">
+                    <div class="chat-message-header">
+                        <span class="chat-message-author ${isFormerTenant ? 'former-tenant' : ''}">${displayName}${displayApt}</span>
+                        <span class="chat-message-time">${formatTime(m.created_at)}</span>
+                    </div>
+                    <div class="chat-message-text">${escapeHtml(m.content)}</div>
+                </div>
+            `}).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function subscribeToChat() {
+            db
+                .channel('chat')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat' }, () => {
+                    loadChat();
+                })
+                .subscribe();
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const content = input.value.trim();
+            if (!content) return;
+
+            const { error } = await db
+                .from('chat')
+                .insert({
+                    content,
+                    author_id: currentUser.id
+                });
+
+            if (error) {
+                alert('Error sending message: ' + error.message);
+                return;
+            }
+
+            input.value = '';
+        }
+
+        function handleChatKeypress(e) {
+            if (e.key === 'Enter') {
+                sendChat();
+            }
+        }
+
+        // ============================================
+        // DIRECTORY
+        // ============================================
+        async function loadDirectory() {
+            const { data, error } = await db
+                .from('profiles')
+                .select('*')
+                .eq('approved', true)
+                .neq('active', false)  // Show users where active is true or null
+                .order('apartment');
+
+            if (error) {
+                console.error('Error loading directory:', error);
+                return;
+            }
+
+            const container = document.getElementById('directoryList');
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No tenants in the directory yet.</p></div>';
+                return;
+            }
+
+            container.innerHTML = data.map(p => {
+                const isMe = p.id === currentUser.id;
+                const displayName = p.go_by || p.full_name;
+                return `
+                <div class="directory-card" style="${isMe ? 'opacity: 0.7; border-left: 3px solid var(--warm-orange);' : ''}">
+                    <h4>${escapeHtml(displayName)} ${isMe ? '<span style="font-size: 0.8rem; color: var(--warm-orange);">(You)</span>' : ''}</h4>
+                    <div class="apt">Apt ${escapeHtml(p.apartment)}</div>
+                    ${p.show_in_directory && p.phone ? `<div class="contact">📱 ${formatPhone(p.phone)}</div>` : ''}
+                    ${p.show_in_directory && p.email ? `<div class="contact">✉️ <a href="mailto:${escapeHtml(p.email)}">${escapeHtml(p.email)}</a></div>` : ''}
+                    ${!p.show_in_directory ? '<div class="contact" style="font-style: italic; opacity: 0.7;">Contact info private</div>' : ''}
+                    ${!isMe ? `<button class="btn-message" onclick="startConversation('${p.id}', '${escapeHtml(p.full_name)}', '${escapeHtml(p.apartment)}')">💬 Message</button>` : ''}
+                    ${isAdmin && !isMe ? `<button class="btn-message" style="background: #e74c3c; margin-left: 0.5rem;" onclick="adminDeactivateUser('${p.id}', '${escapeHtml(p.full_name)}')">Deactivate</button>` : ''}
+                </div>
+            `}).join('');
+        }
+
+        // ============================================
+        // DIRECT MESSAGES
+        // ============================================
+        let currentConversationPartner = null;
+
+        async function loadConversations() {
+            // Get all messages where user is sender or recipient
+            const { data, error } = await db
+                .from('direct_messages')
+                .select('*, sender:profiles!direct_messages_sender_id_fkey(id, full_name, apartment), recipient:profiles!direct_messages_recipient_id_fkey(id, full_name, apartment)')
+                .or(`sender_id.eq.${currentUser.id},recipient_id.eq.${currentUser.id}`)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error loading conversations:', error);
+                return;
+            }
+
+            // Group by conversation partner
+            const conversations = {};
+            let totalUnread = 0;
+
+            data.forEach(msg => {
+                const partnerId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
+                const partner = msg.sender_id === currentUser.id ? msg.recipient : msg.sender;
+
+                if (!conversations[partnerId]) {
+                    conversations[partnerId] = {
+                        partnerId,
+                        partnerName: partner?.full_name || 'Unknown',
+                        partnerApt: partner?.apartment || '?',
+                        lastMessage: msg.content,
+                        lastTime: msg.created_at,
+                        unread: 0
+                    };
+                }
+
+                // Count unread messages (received and not read)
+                if (msg.recipient_id === currentUser.id && !msg.read) {
+                    conversations[partnerId].unread++;
+                    totalUnread++;
+                }
+            });
+
+            // Update unread badge
+            updateUnreadBadge(totalUnread);
+
+            // Render conversations list
+            const container = document.getElementById('conversationsContainer');
+            const convList = Object.values(conversations);
+
+            if (convList.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No messages yet. Visit the Directory to message a neighbor!</p></div>';
+                return;
+            }
+
+            container.innerHTML = convList.map(c => `
+                <div class="conversation-item ${c.unread > 0 ? 'unread' : ''}" onclick="openConversation('${c.partnerId}', '${escapeHtml(c.partnerName)}', '${escapeHtml(c.partnerApt)}')">
+                    <div class="conversation-info">
+                        <div class="conversation-name">${escapeHtml(c.partnerName)} (${escapeHtml(c.partnerApt)}) ${c.unread > 0 ? `<span class="badge">${c.unread}</span>` : ''}</div>
+                        <div class="conversation-preview">${escapeHtml(c.lastMessage)}</div>
+                    </div>
+                    <div class="conversation-time">${formatTime(c.lastTime)}</div>
+                </div>
+            `).join('');
+        }
+
+        async function openConversation(partnerId, partnerName, partnerApt) {
+            currentConversationPartner = { id: partnerId, name: partnerName, apt: partnerApt };
+            
+            document.getElementById('conversationsList').classList.add('hidden');
+            document.getElementById('conversationView').classList.remove('hidden');
+            document.getElementById('conversationWith').textContent = `${partnerName} (${partnerApt})`;
+
+            // Load messages
+            await loadConversationMessages(partnerId);
+
+            // Mark messages as read
+            await markMessagesAsRead(partnerId);
+        }
+
+        async function loadConversationMessages(partnerId) {
+            const { data, error } = await db
+                .from('direct_messages')
+                .select('*')
+                .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${partnerId}),and(sender_id.eq.${partnerId},recipient_id.eq.${currentUser.id})`)
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error('Error loading messages:', error);
+                return;
+            }
+
+            const container = document.getElementById('dmMessages');
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No messages yet. Say hello!</p></div>';
+                return;
+            }
+
+            container.innerHTML = data.map(m => `
+                <div class="dm-message ${m.sender_id === currentUser.id ? 'sent' : 'received'}">
+                    <div>${escapeHtml(m.content)}</div>
+                    <div class="dm-message-time">${formatTime(m.created_at)}</div>
+                </div>
+            `).join('');
+
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function markMessagesAsRead(partnerId) {
+            await db
+                .from('direct_messages')
+                .update({ read: true })
+                .eq('sender_id', partnerId)
+                .eq('recipient_id', currentUser.id)
+                .eq('read', false);
+
+            // Refresh unread count
+            loadConversations();
+        }
+
+        function startConversation(userId, userName, userApt) {
+            // Switch to Messages tab and open conversation
+            showTab('messages');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('messagesTab').classList.add('active');
+            openConversation(userId, userName, userApt);
+        }
+
+        async function sendDirectMessage() {
+            const input = document.getElementById('dmInput');
+            const content = input.value.trim();
+
+            if (!content || !currentConversationPartner) return;
+
+            const { error } = await db
+                .from('direct_messages')
+                .insert({
+                    sender_id: currentUser.id,
+                    recipient_id: currentConversationPartner.id,
+                    content: content,
+                    read: false
+                });
+
+            if (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message. Please try again.');
+                return;
+            }
+
+            input.value = '';
+            await loadConversationMessages(currentConversationPartner.id);
+        }
+
+        function backToConversations() {
+            currentConversationPartner = null;
+            document.getElementById('conversationView').classList.add('hidden');
+            document.getElementById('conversationsList').classList.remove('hidden');
+            loadConversations();
+        }
+
+        function handleDmKeypress(e) {
+            if (e.key === 'Enter') {
+                sendDirectMessage();
+            }
+        }
+
+        function updateUnreadBadge(count) {
+            const badge = document.getElementById('unreadBadge');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        }
+
+        function formatCategory(cat) {
+            const labels = {
+                general: 'General',
+                selling: 'Selling',
+                giving: 'Giving Away',
+                wanted: 'Wanted',
+                services: 'Services',
+                recommendations: 'Recommendations'
+            };
+            return labels[cat] || cat;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatPhone(phone) {
+            if (!phone) return '';
+            // Strip all non-digits
+            const digits = phone.replace(/\D/g, '');
+            // Format as (XXX) XXX-XXXX for 10 digits, or +1 (XXX) XXX-XXXX for 11
+            if (digits.length === 10) {
+                return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+            } else if (digits.length === 11 && digits[0] === '1') {
+                return `+1 (${digits.slice(1,4)}) ${digits.slice(4,7)}-${digits.slice(7)}`;
+            }
+            // Return original if not standard format
+            return phone;
+        }
+
+        // ============================================
+        // COMMUNITY GUIDELINES
+        // ============================================
+        function toggleGuidelines() {
+            const box = document.getElementById('guidelinesBox');
+            box.classList.toggle('hidden');
+        }
+
+        function showGuidelinesModal() {
+            document.getElementById('guidelinesModal').classList.add('active');
+        }
+
+        function closeGuidelinesModal(event) {
+            if (!event || event.target.id === 'guidelinesModal') {
+                document.getElementById('guidelinesModal').classList.remove('active');
+            }
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grosvenor Tenants Association</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --warm-orange: #D35400; --deep-orange: #A04000; --cream: #FDF8F3; --soft-orange: #E67E22; --light-orange: #FDEEE4; --text-dark: #3A3A3A; --text-light: #6B6B6B; --border-light: #F0E6DC; --primary-brown: #5D4037; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: var(--text-dark); background-color: var(--cream); }
+        .header-wrapper { background-color: #00A0B0; padding: 0.5rem; }
+        header { display: flex; max-width: 900px; margin: 0 auto; }
+        .header-photo img { display: block; height: 140px; width: auto; }
+        .header-text { flex: 1; display: flex; flex-direction: column; }
+        .header-top { background-color: #D8D8D0; padding: 0.75rem 1rem; text-align: center; flex: 1; }
+        .header-top .the-new { color: #C65D24; font-style: italic; font-size: 1.1rem; margin: 0; }
+        .header-top .ta-name { color: #4A4A4A; font-family: Georgia, serif; font-size: 1.3rem; margin: 0.1rem 0 0 0; }
+        .header-bottom { background-color: #FAFAFA; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: flex-end; }
+        .header-bottom .tagline { color: #C65D24; font-size: 0.9rem; line-height: 1.3; }
+        .header-bottom .reimagined { text-align: right; font-size: 0.75rem; color: #4A4A4A; font-style: italic; }
+        .header-bottom .reimagined .your { display: block; }
+        nav { background-color: white; border-bottom: 1px solid var(--border-light); padding: 1rem; position: sticky; top: 0; z-index: 100; }
+        nav > ul { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 2rem; max-width: 900px; margin: 0 auto; }
+        nav > ul > li { position: relative; }
+        nav a { color: var(--text-dark); text-decoration: none; font-size: 0.95rem; padding: 0.25rem 0; border-bottom: 2px solid transparent; }
+        nav a:hover { border-bottom-color: var(--soft-orange); }
+        .nav-dropdown > a { cursor: pointer; }
+        .nav-dropdown > a::after { content: ' ▾'; font-size: 0.75rem; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: white; border: 1px solid var(--border-light); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0.5rem 0; min-width: 160px; z-index: 200; list-style: none; }
+        .nav-dropdown:hover .dropdown-menu { display: block; }
+        .dropdown-menu li { padding: 0; }
+        .dropdown-menu a { display: block; padding: 0.5rem 1rem; border-bottom: none; font-size: 0.9rem; }
+        .dropdown-menu a:hover { background-color: var(--light-orange); }
+        main { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+        section { margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-light); }
+        section:last-of-type { border-bottom: none; }
+        h2 { color: var(--deep-orange); font-size: 1.4rem; font-weight: 600; margin-bottom: 1rem; }
+        p { margin-bottom: 1rem; }
+        .info-card { background: white; border: 1px solid var(--border-light); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+        .info-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .info-card p { margin-bottom: 0.5rem; font-size: 0.95rem; }
+        .info-card p:last-child { margin-bottom: 0; }
+        a { color: var(--warm-orange); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 0.75rem 0; border-bottom: 1px solid var(--border-light); }
+        .resource-list li:last-child { border-bottom: none; }
+        .resource-list a { font-weight: 500; }
+        .resource-list span { display: block; font-size: 0.9rem; color: var(--text-light); margin-top: 0.25rem; }
+        .events-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+        .event-card { background: white; border-left: 4px solid var(--warm-orange); padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+        .event-card:last-child { margin-bottom: 0; }
+        .event-title { font-weight: 800; font-size: 1.15rem; color: var(--primary-brown); margin-bottom: 0.25rem; }
+        .event-date { color: var(--warm-orange); font-weight: 600; font-size: 0.95rem; }
+        .event-time { color: var(--text-light); font-size: 0.9rem; }
+        .event-location { color: var(--text-light); font-size: 0.9rem; margin-top: 0.25rem; }
+        .events-loading { text-align: center; color: var(--text-light); padding: 2rem; }
+        .view-all-link { display: inline-block; margin-top: 1rem; color: var(--warm-orange); font-weight: 500; }
+        .archive-list { list-style: none; }
+        .archive-list li { padding: 0.5rem 0; }
+        .archive-item { display: flex; justify-content: space-between; align-items: center; }
+        .archive-date { font-size: 0.85rem; color: var(--text-light); }
+        footer { background-color: #00A0B0; text-align: center; padding: 1.5rem; margin-top: 2rem; }
+        @media (max-width: 600px) { header { flex-direction: column; } .header-photo img { width: 100%; height: auto; } .header-bottom { flex-direction: column; align-items: flex-start; gap: 0.5rem; } nav > ul { gap: 0.5rem 1.5rem; } .dropdown-menu { left: 0; transform: none; } }
+    </style>
+</head>
+<body>
+    <div class="header-wrapper"><header><div class="header-photo"><img src="building-cropped.jpg" alt="The Grosvenor Building"></div><div class="header-text"><div class="header-top"><p class="the-new">The New</p><p class="ta-name">Grosvenor Tenants Association</p></div><div class="header-bottom"><div class="tagline">New Neighbors,<br>New Energy!</div><div class="reimagined"><span class="your">Your</span>Tenants Association <em>Reimagined</em></div></div></div></header></div>
+    <nav><ul><li class="nav-dropdown"><a>Building</a><ul class="dropdown-menu"><li><a href="#building">Building Info</a></li><li><a href="#calendar">Reserve Penthouse</a></li><li><a href="#guides">Your Apartment</a></li></ul></li><li class="nav-dropdown"><a>Resources</a><ul class="dropdown-menu"><li><a href="#resources">Tenant Resources</a></li><li><a href="#archive">Archive</a></li></ul></li><li><a href="/community" style="color: var(--soft-orange); font-weight: 600;">Community</a></li><li><a href="#contact">Contact</a></li></ul></nav>
+    <main>
+        <section id="welcome"><h2>Welcome</h2><p>The Grosvenor Tenants Association is a community of neighbors working together to make our building a great place to live.</p><p>This site is your hub for building information, resources, and ways to connect with fellow tenants.</p><p><strong>Who are our members?</strong> You are — every lease-holding resident of The Grosvenor is already a member, whether you've attended a single meeting or not. You don't need to sign up or do anything. You're in.</p><p>But we thrive with your participation, whether highly visible or behind the scenes. Want roofdeck furniture? Let's figure it out together. Think the building or community could be better in some way? There's probably a way to do it. Let's talk it through and see where we align. We're neighbors — finding common ground shouldn't be hard.</p></section>
+        <section id="events"><h2>Upcoming Events</h2><div id="events-container" class="events-list"><p class="events-loading">Loading events...</p></div><a href="https://calendar.google.com/calendar/embed?src=grosvenorta%40gmail.com&ctz=America%2FNew_York" target="_blank" class="view-all-link">View full calendar →</a></section>
+        <section id="building"><h2>Building Information</h2><div class="info-card"><h3>Building Address</h3><p>82-77 116th Street<br>Richmond Hill, NY 11418</p></div><div class="info-card"><h3>Building Owner</h3><p>Steven Li (JLS Group)<br>Phone: (718) 886-8268</p></div><div class="info-card"><h3>Management Company</h3><p><strong>Polaris Management Co.</strong><br>Building Manager: Jeff Zheng<br>Phone: <a href="tel:+19179479056">(917) 947-9056</a><br>Email: <a href="mailto:Residential@polarismgco.com">Residential@polarismgco.com</a><br><a href="https://residentcenter.com" target="_blank">ResidentCenter.com</a> - Official tenant portal</p></div><div class="info-card"><h3>Building Superintendent</h3><p>Freddie Cordero<br>Phone: <a href="tel:+16465419090">(646) 541-9090</a></p></div><div class="info-card"><h3>Rent Payment Address</h3><p>Grosvenor Realty Group II LLC<br>46-02 21st Street, PO Box 1836<br>Long Island City, NY</p></div><div class="info-card" style="border-left: 3px solid #e74c3c;"><h3>🚨 Emergency Numbers</h3><p style="margin-bottom: 0.75rem;"><strong>Gas Leak/Odor:</strong> National Grid<br><a href="tel:+17186434050">(718) 643-4050</a> — Call immediately, available 24/7</p><p style="margin-bottom: 0.75rem;"><strong>Electricity:</strong> Con Edison<br><a href="tel:+18007526633">1-800-75-CONED (1-800-752-6633)</a></p><p style="margin-bottom: 0;"><strong>Life-threatening emergency:</strong> 911</p></div></div><div class="info-card"><h3>🚪 Building Access — ButterflyMX</h3><p>Download the <strong>ButterflyMX app</strong> to open building doors from your smartphone, see visitors on video, and create your own PIN code.</p><p><a href="https://butterflymx.com" target="_blank">butterflymx.com</a></p></div><div class="info-card"><h3>🔑 Keyfob Duplication</h3><p><strong>Manhattan Hardware & Housewares</strong><br>688 9th Avenue (between 47th & 48th)<br>New York, NY 10036<br>Phone: <a href="tel:+12127574571">(212) 757-4571</a></p><p style="font-size: 0.9rem; color: var(--text-light);">Tip: Tell them it's for a Dormakaba lock.</p><p><a href="https://www.yelp.com/biz/manhattan-hardware-and-housewares-new-york-2" target="_blank">View on Yelp</a></p></div></section>
+        <section id="guides"><h2>Your Apartment</h2><p>Tips, manuals, and maintenance info for the appliances in our units - the stuff management doesn't tell you.</p><div class="info-card"><h3>HVAC Units</h3><p>Model: [Model number to be added]</p><p><a href="#">Owner's Manual (PDF)</a></p><p style="font-size: 0.9rem; color: var(--text-light);">Filter cleaning, seasonal settings, troubleshooting tips coming soon.</p></div><div class="info-card"><h3>Washer/Dryer</h3><p>Model: [Model number to be added]</p><p><a href="#">Owner's Manual (PDF)</a></p><p style="font-size: 0.9rem; color: var(--text-light);">Cycle guide, lint trap maintenance, common error codes coming soon.</p></div><p>Have a manual or tip to share? Email <a href="mailto:grosvenorta@gmail.com">grosvenorta@gmail.com</a> and we'll add it here.</p></section>
+        <section id="resources"><h2>Tenant Resources</h2><div class="info-card"><h3>Free Legal Consultation</h3><p>Our tenants association works with legal representation available to speak with tenants about housing-related legal matters upon request.</p><p>To schedule a consultation, email us at <a href="mailto:grosvenorta@gmail.com">grosvenorta@gmail.com</a>.</p></div><div class="info-card"><h3>🚔 102nd Precinct (Our Local NYPD)</h3><p>87-34 118th Street<br>Phone: <a href="tel:+17188053200">(718) 805-3200</a><br>Community Affairs: <a href="tel:+17188053215">(718) 805-3215</a><br><a href="https://www.nyc.gov/site/nypd/bureaus/patrol/precincts/102nd-precinct.page" target="_blank">Precinct Website</a></p></div><ul class="resource-list"><li><a href="https://portal.311.nyc.gov" target="_blank">311 - NYC Services</a><span>Report issues, ask questions, access city services</span></li><li><a href="https://www.nyc.gov/hpd" target="_blank">NYC Housing Preservation & Development (HPD)</a><span>File complaints about housing conditions</span></li><li><a href="https://www.metcouncilonhousing.org/" target="_blank">Met Council on Housing</a><span>Tenant rights hotline: (212) 979-0611</span></li><li><a href="https://hcr.ny.gov/" target="_blank">NYS Homes & Community Renewal</a><span>Rent regulation, DHCR complaints</span></li><li><a href="https://www.justfix.org/" target="_blank">JustFix</a><span>Free tools for documenting housing issues</span></li></ul></section>
+        <section id="calendar"><h2>Reserve the Penthouse</h2><p><em>Do I really have to reserve the Common Room?</em><br>Nah. Especially if you're just hanging out, studying, reading, or whatever.</p><p>There's no authority, no permission given or taken away. We just let each other know our intentions and preferences, like if we are inviting people over on a particular night for a certain event.</p><p>It's all about being good neighbors, and making it easy for all of us to get the most out of living here together at The Grosvenor.</p><p><em>I see the PH is reserved, or I didn't know the PH was reserved, but I really wanted to go out on the roof deck!</em><br>Fine. A reservation never means excluding fellow tenants, and we all get that.</p><p><strong>To add your event:</strong> Email <a href="mailto:grosvenorta@gmail.com">grosvenorta@gmail.com</a> with the date, time, and what you're planning. We'll make sure it shows up here.</p><div style="background: white; border: 1px solid var(--border-light); border-radius: 8px; padding: 0; overflow: hidden;"><iframe src="https://calendar.google.com/calendar/embed?src=3ea5af03cf03f191b723c2ba061f36a8eda5904706cc3bfa47d0474d399b4fee%40group.calendar.google.com&ctz=America%2FNew_York&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=0" style="border: 0; width: 100%; height: 450px;" frameborder="0" scrolling="no"></iframe></div></section>
+        <section id="archive"><h2>Archive</h2><p>Past communications, posters, and announcements from the Tenants Association.</p><h3 style="margin-top: 1.5rem; font-size: 1.1rem; color: var(--warm-orange);">📰 Newsletters</h3><ul class="archive-list"><li class="archive-item"><a href="flyers/2026/2026-01-CommunitySignupFlyer.pdf" target="_blank">Community Website Sign-Up Guide</a><span class="archive-date">January 2026</span></li><li class="archive-item"><a href="flyers/2025/2025-05-12-Newsletter-MovieNight.pdf" target="_blank">Movie Night (Paddington 2)</a><span class="archive-date">May 12, 2025</span></li><li class="archive-item"><a href="flyers/2025/2025-04-26-MovieNightEdition.pdf" target="_blank">Movie Night Edition (Vote!)</a><span class="archive-date">April 26, 2025</span></li><li class="archive-item"><a href="flyers/2025/2025-04-17-GameNightReminder.pdf" target="_blank">Game Night Reminder</a><span class="archive-date">April 17, 2025</span></li><li class="archive-item"><a href="flyers/2025/2025-04-11-Newsletter.pdf" target="_blank">Game Night Announcement</a><span class="archive-date">April 11, 2025</span></li></ul><h3 style="margin-top: 1.5rem; font-size: 1.1rem; color: var(--warm-orange);">🪧 Lobby Posters</h3><ul class="archive-list"><li class="archive-item"><a href="flyers/2026/2026-01-HappyNewYear.pdf" target="_blank">Happy New Year 2026</a><span class="archive-date">January 2026</span></li><li class="archive-item"><a href="flyers/2025/2025-06-28-WhatsNextLobbyPoster.pdf" target="_blank">What's Next for the TA?</a><span class="archive-date">June 28, 2025</span></li><li class="archive-item"><a href="flyers/2025/2025-05-17-Paddington2LobbyPoster.pdf" target="_blank">Paddington 2 Movie Night</a><span class="archive-date">May 17, 2025</span></li><li class="archive-item"><a href="flyers/2025/2025-04-26-MovieNightVotePoster.pdf" target="_blank">May Movie Night — Vote!</a><span class="archive-date">April 26, 2025</span></li><li class="archive-item"><a href="flyers/2025/2025-04-17-GameNightLobbyPoster.pdf" target="_blank">Game Night in The Penthouse</a><span class="archive-date">April 17, 2025</span></li><li class="archive-item"><a href="flyers/2025/2025-04-17-GameNightFlyer.pdf" target="_blank">Game Night Flyer</a><span class="archive-date">April 17, 2025</span></li><li class="archive-item"><a href="flyers/2025/2025-02-NewTALobbyPoster.pdf" target="_blank">The New Grosvenor TA</a><span class="archive-date">February 2025</span></li></ul></section>
+        <section id="contact"><h2>Contact Us</h2><div class="info-card"><h3>Email</h3><p><a href="mailto:grosvenorta@gmail.com">grosvenorta@gmail.com</a></p></div><div class="info-card"><h3>Phone</h3><p><a href="tel:+19177179272">917-717-9272</a></p></dw Date().toISOString()}&maxResults=3&singleEvents=true&orderBy=startTime`;
+            try {
+                const data = await (await fetch(url)).json();
+                if (data.items && data.items.length > 0) {
+                    container.innerHTML = data.items.map(event => {
+                        const start = event.start.dateTime || event.start.date;
+                        const dateObj = new Date(start);
+                        const options = event.start.dateTime 
+                            ? { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }
+                            : { weekday: 'long', month: 'long', day: 'numeric' };
+                        const dateStr = dateObj.toLocaleDateString('en-US', options);
+                        const location = event.location ? `<p class="event-location">📍 ${event.location}</p>` : '';
+                        const description = event.description ? `<p class="event-description">${event.description}</p>` : '';
+                        return `<div class="event-card">
+                            <p class="event-title"><strong>${event.summary}</strong></p>
+                            <p class="event-time">${dateStr}</p>
+                            ${location}
+                            ${description}
+                        </div>`;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<p class="events-loading">No upcoming events scheduled.</p>';
+                }
+            } catch (err) {
+                container.innerHTML = '<p class="events-loading">Unable to load events.</p>';
+                console.error('Calendar error:', err);
+            }
+        }
+        loadEvents();
+    </script>
+</body>
+</html>
