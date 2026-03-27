@@ -861,12 +861,50 @@
             </div>
             <button type="submit" class="btn">Sign In</button>
         </form>
-        <div class="auth-toggle">
+        <div class="auth-toggle" style="margin-top: 1rem;">
+            <a href="#" onclick="showForgotPassword(); return false;">Forgot password?</a>
+        </div>
+        <div class="auth-toggle" style="margin-top: 0.5rem;">
             New to the community? <a href="#" onclick="showSignup(); return false;">Sign up</a>
         </div>
         <div style="text-align: center; margin-top: 1rem;">
             <a href="index.html" style="color: var(--text-light); font-size: 0.85rem;">← Back to main site</a>
         </div>
+    </div>
+
+    <!-- Auth: Forgot Password -->
+    <div id="forgotPasswordScreen" class="auth-container hidden">
+        <h2>Reset Password</h2>
+        <p>Enter your email and we'll send you a reset link.</p>
+        <div id="forgotMessage"></div>
+        <form onsubmit="sendResetLink(event)">
+            <div class="form-group">
+                <label for="forgotEmail">Email</label>
+                <input type="email" id="forgotEmail" required>
+            </div>
+            <button type="submit" class="btn">Send Reset Link</button>
+        </form>
+        <div class="auth-toggle">
+            <a href="#" onclick="showLogin(); return false;">Back to login</a>
+        </div>
+    </div>
+
+    <!-- Auth: Set New Password -->
+    <div id="newPasswordScreen" class="auth-container hidden">
+        <h2>Set New Password</h2>
+        <p>Set your new password.</p>
+        <div id="newPasswordMessage"></div>
+        <form onsubmit="updatePassword(event)">
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required minlength="6">
+            </div>
+            <button type="submit" class="btn">Update Password</button>
+        </form>
     </div>
 
     <!-- Auth: Signup -->
@@ -1618,6 +1656,42 @@
             showLogin();
         }
 
+        async function sendResetLink(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmail').value.trim();
+            showMessage('forgotMessage', 'Sending reset link...', 'info');
+            await db.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://grosvenorta.com/community'
+            });
+            showMessage('forgotMessage', 'Check your email — we sent you a reset link.', 'success');
+        }
+
+        async function updatePassword(e) {
+            e.preventDefault();
+            const newPwd = document.getElementById('newPassword').value;
+            const confirmPwd = document.getElementById('confirmPassword').value;
+
+            if (newPwd.length < 6) {
+                showMessage('newPasswordMessage', 'Password must be at least 6 characters.', 'error');
+                return;
+            }
+            if (newPwd !== confirmPwd) {
+                showMessage('newPasswordMessage', 'Passwords do not match.', 'error');
+                return;
+            }
+
+            showMessage('newPasswordMessage', 'Updating password...', 'info');
+            const { error } = await db.auth.updateUser({ password: newPwd });
+            if (error) {
+                showMessage('newPasswordMessage', error.message, 'error');
+                return;
+            }
+            showMessage('newPasswordMessage', "Password updated! You're all set.", 'success');
+            setTimeout(async () => {
+                await loadProfile();
+            }, 1500);
+        }
+
         async function saveProfile() {
             const fullName = document.getElementById('settingsFullName').value.trim();
             const goBy = document.getElementById('settingsGoBy').value.trim();
@@ -1830,6 +1904,16 @@
             document.getElementById('signupScreen').classList.remove('hidden');
         }
 
+        function showForgotPassword() {
+            hideAll();
+            document.getElementById('forgotPasswordScreen').classList.remove('hidden');
+        }
+
+        function showNewPassword() {
+            hideAll();
+            document.getElementById('newPasswordScreen').classList.remove('hidden');
+        }
+
         function showAwaitingApproval() {
             hideAll();
             document.getElementById('awaitingScreen').classList.remove('hidden');
@@ -1862,6 +1946,8 @@
         function hideAll() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('signupScreen').classList.add('hidden');
+            document.getElementById('forgotPasswordScreen').classList.add('hidden');
+            document.getElementById('newPasswordScreen').classList.add('hidden');
             document.getElementById('awaitingScreen').classList.add('hidden');
             document.getElementById('mainHeader').classList.add('hidden');
             document.getElementById('mainApp').classList.add('hidden');
@@ -2448,6 +2534,11 @@
         // INIT
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
+            db.auth.onAuthStateChange((event, session) => {
+                if (event === 'PASSWORD_RECOVERY') {
+                    showNewPassword();
+                }
+            });
             checkAuth();
         });
     </script>
