@@ -58,7 +58,6 @@ the dated entries below; this is the index.
   trigger, so it was pure attack surface). Applied live + first tracked supabase
   migration (20260606114108). Verified: anon SELECT -> [], anon INSERT -> 42501,
   Security Advisor profiles/always-true lints -> 0.
-- PUSH PENDING: 2 commits on main not yet pushed to origin (8d5b76c, 2985d16).
 
 - ~/Developer/grosvenor-ta-private/ exists (plain dir, not a repo). Holds the
   relocated tenants CSV (resident names × apartments), moved out of the repo
