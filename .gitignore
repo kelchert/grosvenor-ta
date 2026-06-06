@@ -1,1 +1,6 @@
 .DS_Store
+
+# Resident PII — never publish (Netlify serves repo root via publish="."). Live copy: ~/Developer/grosvenor-ta-private/
+*.csv
+docs/*.csv
+*.xlsx
