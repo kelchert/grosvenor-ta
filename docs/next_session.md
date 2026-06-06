@@ -2,6 +2,28 @@
 
 First state file created 2026-06-06 (security remediation, pre-onboarding).
 
+## Session 2026-06-06 (cont.) — remaining-tables RLS audit + chat lockdown
+- DONE: chat SELECT restricted to authenticated (was role=public USING(true), i.e.
+  world-readable via the public anon key embedded in community.html). Sensitive group
+  chat, never shown pre-login (loadChat runs only from showMainApp after auth+approval).
+  Migration 20260606080306 applied live + tracked. Verified: anon SELECT chat -> [];
+  anon SELECT announcements/bulletin still return rows (confirms not over-locked);
+  Security Advisor re-run -> no new lints.
+- DECIDED 2026-06-06: announcements + bulletin SELECT stay role=public / anon-readable
+  ON PURPOSE — reserved for a future public-facing notices view. This is NOT the
+  profiles always-true bug; do not "fix" it. Residual accepted: bulletin is
+  resident-authored and its display joins profiles(full_name, apartment), so a
+  public-readable bulletin exposes poster name + apartment. Accepted for a building
+  noticeboard. Revisit if a privacy concern surfaces.
+- CLOSED: the carried-forward "audit remaining tables" item. All 5 public tables are
+  now audited — profiles + chat remediated; direct_messages is correctly
+  participant-scoped (SELECT USING auth.uid()=sender_id OR recipient_id — a logged-in
+  resident cannot read others' DMs) and left alone; announcements + bulletin
+  intentionally public (above). No anon INSERT holes on any table (all -> 42501).
+- OPEN (separate hardening pass, NOT table-RLS): handle_new_user advisor warnings
+  (anon/authenticated SECURITY DEFINER executable + mutable search_path) and the
+  leaked-password-protection toggle. Address as its own pass when convenient.
+
 ## Last session (2026-06-06)
 - DONE: profiles RLS remediated. Anon could read all PII (names/apts/emails) and
   insert arbitrary rows; both closed. SELECT now TO authenticated USING(true),
@@ -18,10 +40,10 @@ First state file created 2026-06-06 (security remediation, pre-onboarding).
   to an allowlist dir; once the served root is allowlisted, in-repo-but-unpublished
   becomes safe and this dir either folds back in or becomes the GTA-ops split. Do
   not delete or fold back before that.
-- OPEN: RLS confirmation on the OTHER tables. profiles is now locked, but this
-  session only audited profiles. chat / bulletin / announcements / direct_messages
-  policies are unaudited — same anon-key check (curl + Security Advisor) should be
-  run against each. The 0e8c9739 / Kenneth / Joseph rows are real residents.
+- (was OPEN, now CLOSED — see "Session 2026-06-06 (cont.)" above): RLS confirmation
+  on the OTHER tables. chat / bulletin / announcements / direct_messages have all
+  now been audited via the anon-key check + Security Advisor. The 0e8c9739 / Kenneth
+  / Joseph rows are real residents.
 - DECIDED 2026-06-06: "Hide my email" stays frontend-only; DB-level enforcement
   consciously declined. Rationale: threat is tenant-to-tenant (a logged-in resident
   hand-querying the API), not public — the anon hole was the real exposure and is
