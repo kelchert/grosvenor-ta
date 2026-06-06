@@ -11,9 +11,12 @@ First state file created 2026-06-06 (security remediation, pre-onboarding).
   not delete or fold back before that.
 - OPEN: tenant-data RLS confirmation (Supabase dashboard) — the actual data lock;
   repo audit can't reach it.
-- OPEN: email privacy not enforced at DB. "Hide my email" is frontend-only —
-  loadDirectory honors show_in_directory client-side, but the SELECT policy returns
-  email to any authenticated reader. After the anon fix, a logged-in resident can
-  still query other residents' hidden emails directly via the API. Decision needed:
-  enforce at DB (directory view that omits hidden emails, or column-level rule) or
-  consciously accept for a single building. Real PII, tenant-to-tenant scope.
+- DECIDED 2026-06-06: "Hide my email" stays frontend-only; DB-level enforcement
+  consciously declined. Rationale: threat is tenant-to-tenant (a logged-in resident
+  hand-querying the API), not public — the anon hole was the real exposure and is
+  closed. For a single building this is an accepted residual, not a gap to fix.
+  Revisit only if scale or a specific incident changes the calculus. The fix if ever
+  needed: a directory view that omits email when show_in_directory is off.
+- NOTED (pre-existing, not urgent): rejectUser() (community.html:2038) calls .delete()
+  on profiles but there's no DELETE policy, so it silently no-ops. Admin reject
+  doesn't actually remove the row. Separate fix when convenient.
