@@ -2,6 +2,31 @@
 
 First state file created 2026-06-06 (security remediation, pre-onboarding).
 
+ONBOARDED to portfolio 2026-06-06 — onboarding commit "onboard grosvenor-ta to
+portfolio system" (SHA reported to the hub session; a commit can't contain its own
+hash, so it's anchored here by date + message rather than a self-referential SHA).
+
+## Parked / owed work
+Single durable home for owed items — the CLAUDE.md spine points here so this can't
+drift against a second copy. Detailed context for several of these already lives in
+the dated entries below; this is the index.
+- Allowlist publish-dir conversion + public/ reorg. Careful live-site work: flip
+  netlify publish from "." to an allowlisted served dir, then reorg. Unblocks folding
+  ~/Developer/grosvenor-ta-private/ back in (see holding-pen note below). Not started.
+- Re-home parked REFERENCE docs into docs/ — name them so they're not lost: the full
+  poster house-style spec, the detailed calendar-workflow reference, and the comms
+  playbook (the reference-depth versions). NOTE: the operational guardrails are now
+  inline in CLAUDE.md; what's parked is the reference DETAIL. The panel still holds the
+  authoritative copies of these specific docs until they're re-homed here.
+- Version the poster pipeline (ReportLab scripts + building.jpg) into a
+  poster-pipeline/ subtree. Currently un-versioned tooling.
+- Fold GTA-SourceFileManagement.md's still-valid parts (the Cloudflare contamination
+  check + decode-recovery procedure) into a future docs/deploy.md. The doc stays at
+  docs/GTA-SourceFileManagement.md (canonical) until that fold happens.
+- Advisor hardening (separate pass, not table-RLS): handle_new_user — set search_path
+  + tighten SECURITY DEFINER EXECUTE (3 advisor lints) — and enable leaked-password
+  protection. Same item tracked in the dated RLS entries below.
+
 ## Session 2026-06-06 (cont.) — remaining-tables RLS audit + chat lockdown
 - DONE: chat SELECT restricted to authenticated (was role=public USING(true), i.e.
   world-readable via the public anon key embedded in community.html). Sensitive group
