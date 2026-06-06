@@ -5,6 +5,8 @@ First state file created 2026-06-06 (security remediation, pre-onboarding).
 ONBOARDED to portfolio 2026-06-06 — onboarding commit "onboard grosvenor-ta to
 portfolio system" (SHA reported to the hub session; a commit can't contain its own
 hash, so it's anchored here by date + message rather than a self-referential SHA).
+Hub session closed 2026-06-06; GTA stub placed in Panel; onboarding commit ae7854d
+on origin. Onboarding loop complete.
 
 ## Parked / owed work
 Single durable home for owed items — the CLAUDE.md spine points here so this can't
