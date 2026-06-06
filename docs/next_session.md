@@ -11,3 +11,9 @@ First state file created 2026-06-06 (security remediation, pre-onboarding).
   not delete or fold back before that.
 - OPEN: tenant-data RLS confirmation (Supabase dashboard) — the actual data lock;
   repo audit can't reach it.
+- OPEN: email privacy not enforced at DB. "Hide my email" is frontend-only —
+  loadDirectory honors show_in_directory client-side, but the SELECT policy returns
+  email to any authenticated reader. After the anon fix, a logged-in resident can
+  still query other residents' hidden emails directly via the API. Decision needed:
+  enforce at DB (directory view that omits hidden emails, or column-level rule) or
+  consciously accept for a single building. Real PII, tenant-to-tenant scope.
