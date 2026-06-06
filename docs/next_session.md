@@ -2,6 +2,15 @@
 
 First state file created 2026-06-06 (security remediation, pre-onboarding).
 
+## Last session (2026-06-06)
+- DONE: profiles RLS remediated. Anon could read all PII (names/apts/emails) and
+  insert arbitrary rows; both closed. SELECT now TO authenticated USING(true),
+  anon INSERT policy dropped (signup uses the SECURITY DEFINER handle_new_user()
+  trigger, so it was pure attack surface). Applied live + first tracked supabase
+  migration (20260606114108). Verified: anon SELECT -> [], anon INSERT -> 42501,
+  Security Advisor profiles/always-true lints -> 0.
+- PUSH PENDING: 2 commits on main not yet pushed to origin (8d5b76c, 2985d16).
+
 - ~/Developer/grosvenor-ta-private/ exists (plain dir, not a repo). Holds the
   relocated tenants CSV (resident names × apartments), moved out of the repo
   because netlify.toml has publish=".", so anything under the repo root is
@@ -9,8 +18,10 @@ First state file created 2026-06-06 (security remediation, pre-onboarding).
   to an allowlist dir; once the served root is allowlisted, in-repo-but-unpublished
   becomes safe and this dir either folds back in or becomes the GTA-ops split. Do
   not delete or fold back before that.
-- OPEN: tenant-data RLS confirmation (Supabase dashboard) — the actual data lock;
-  repo audit can't reach it.
+- OPEN: RLS confirmation on the OTHER tables. profiles is now locked, but this
+  session only audited profiles. chat / bulletin / announcements / direct_messages
+  policies are unaudited — same anon-key check (curl + Security Advisor) should be
+  run against each. The 0e8c9739 / Kenneth / Joseph rows are real residents.
 - DECIDED 2026-06-06: "Hide my email" stays frontend-only; DB-level enforcement
   consciously declined. Rationale: threat is tenant-to-tenant (a logged-in resident
   hand-querying the API), not public — the anon hole was the real exposure and is
