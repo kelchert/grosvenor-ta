@@ -29,6 +29,29 @@ the dated entries below; this is the index.
   + tighten SECURITY DEFINER EXECUTE (3 advisor lints) — and enable leaked-password
   protection. Same item tracked in the dated RLS entries below.
 
+## Session 2026-06-10 — chat INSERT write-gate hardened (Findings A/B/C closed)
+Seat-designed, CC-applied. The INSERT policy "Approved users can post to chat" was
+role=public with a WITH CHECK requiring only profiles.approved=true — it did NOT pin
+authorship, did NOT exclude former tenants, and author_id was nullable.
+- DONE: migration 20260610184713 (commit 2a6b9d4, on origin/main). Recreate scoped TO
+  authenticated (aligns INSERT posture with the 2026-06-06 SELECT lockdown); WITH CHECK
+  now pins author_id = auth.uid() (Finding B — an impersonation hole reachable via the
+  public anon key) AND requires profiles.active = true (Finding A — former tenants could
+  post); admin path = profiles.email='grosvenorta@gmail.com' posts as itself. author_id
+  SET NOT NULL (Finding C; precheck 0 NULLs / 6 rows, rode clean). Wrapped BEGIN/COMMIT so
+  a failed CREATE rolls the DROP back rather than leaving chat with no INSERT policy.
+- VERIFIED: Tier-1 structural (CC, this session) — roles {authenticated}, with_check has
+  author_id=auth.uid() + active=true, author_id NOT NULL. Tier-2 behavioral matrix GREEN,
+  run by Kenn's seat against the fixed prod gate via GC's audit/insert_write_gate_proof.sql:
+  cell 2 (authed self) ACCEPT; cells 1/3/4 (anon / impersonation / former-self) REJECT
+  42501; none at 23502/23503 (policy, not schema, rejected). Tier-2 is a rolled-back prod
+  probe with no disk artifact — attestation-confirmed, not independently CC-verifiable.
+- DEFERRED (Finding D): email-literal admin check (grosvenorta@gmail.com) → an
+  is_admin/role flag. Needs a schema column + backfill + a GC cross-consumer check (confirm
+  GC keys nothing off the admin email before the swap). Smell-note, not urgent.
+- CROSS-CONSUMER: grosvenor-connect reuses this Supabase and shipped the matching posting
+  UI (Unit B) the same session — any chat schema/RLS change here has a live GC consumer.
+
 ## Session 2026-06-06 (cont.) — remaining-tables RLS audit + chat lockdown
 - DONE: chat SELECT restricted to authenticated (was role=public USING(true), i.e.
   world-readable via the public anon key embedded in community.html). Sensitive group
