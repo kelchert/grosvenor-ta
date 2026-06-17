@@ -1,5 +1,10 @@
 # grosvenor-ta — next session pickup
 
+## Human status — GTA (seat's read, as-of 2026-06-17)
+- Good holding pattern. July/Aug events locked, poster cadence set (Jul teal, Aug orange).
+  One unlock: pick the August movie title — the single thing blocking both poster builds.
+  Background, not urgent: April poster archive upload owed; flyer metadata audit queued.
+
 First state file created 2026-06-06 (security remediation, pre-onboarding).
 
 ONBOARDED to portfolio 2026-06-06 — onboarding commit "onboard grosvenor-ta to
